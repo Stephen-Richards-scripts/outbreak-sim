@@ -212,6 +212,21 @@
     color: #4a7090;
     text-transform: uppercase;
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pop-label-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+  }
+  .pop-label-check input[type=checkbox] {
+    accent-color: var(--v-color);
+    cursor: pointer;
   }
   #pop-canvas {
     display: block;
@@ -393,7 +408,12 @@
   <!-- ── Vis Area ── -->
   <div class="vis-area">
     <div class="pop-panel">
-      <div class="pop-label">Population Grid — Each Dot Represents One Individual</div>
+      <div class="pop-label">
+        <span>Population Grid — Each Dot Represents One Individual</span>
+        <label class="pop-label-check">
+          <input type="checkbox" id="chk-hide-vax"> Hide Vaccinated
+        </label>
+      </div>
       <canvas id="pop-canvas"></canvas>
     </div>
     <div class="chart-panel">
@@ -562,7 +582,9 @@ function drawPopCanvas() {
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
   }
 
+  const hideVax = $('chk-hide-vax').checked;
   agents.forEach(a => {
+    if (hideVax && a.state === 'V') return;
     const col = COLORS[a.state];
     const r = a.state === 'I' ? 5 : a.state === 'D' ? 3 : 4;
 
@@ -757,6 +779,10 @@ $('btn-run').addEventListener('click', () => {
 $('btn-reset').addEventListener('click', () => {
   stop();
   init();
+});
+
+$('chk-hide-vax').addEventListener('change', () => {
+  if (!running) drawPopCanvas();
 });
 
 // ─────────────────────────────────────────────
