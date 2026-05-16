@@ -21,7 +21,7 @@ V (immune from day 0, never transitions)
 ```
 
 Transitions are stochastic each day:
-- S→E: probability = β × (nI / N)
+- S→E: probability = β × (nI / N), where β = R0 × γ
 - E→I: probability = σ (= 1 / latent_period)
 - I→D: probability = μ × γ
 - I→R: probability = γ (= 1 / infectious_period)
