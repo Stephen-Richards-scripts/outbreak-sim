@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PATHOGEN — Outbreak Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap');
+
+  :root {
+    --bg:        #06090f;
+    --panel:     #0c1220;
+    --border:    #1a2a3a;
+    --accent:    #00e5ff;
+    --dim:       #1e3448;
+
+    --s-color:   #3a8fce;   /* Susceptible  */
+    --e-color:   #f0a500;   /* Exposed      */
+    --i-color:   #e03060;   /* Infected     */
+    --r-color:   #22c97a;   /* Recovered    */
+    --d-color:   #555e6a;   /* Dead         */
+    --v-color:   #9f7bea;   /* Vaccinated   */
+
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-head: 'Barlow Condensed', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: #c8d8e8;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  header h1 {
+    font-family: var(--font-head);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  header h1 span { color: #e03060; }
+  .subtitle {
+    font-family: var(--font-head);
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    color: #4a7090;
+    text-transform: uppercase;
+  }
+  .badge {
+    background: #0a1a28;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #4a7090;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Layout ── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+  }
+
+  /* ── Controls sidebar ── */
+  aside {
+    grid-row: 1 / 3;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-label {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #4a7090;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .control-group { display: flex; flex-direction: column; gap: 14px; }
+
+  .control label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #7aa0be;
+  }
+  .control label .val {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .control .desc {
+    font-size: 10px;
+    color: #384a5c;
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--dim);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 8px; }
+  button {
+    flex: 1;
+    padding: 10px 6px;
+    border: 1px solid var(--border);
+    background: #0a1828;
+    color: #7aa0be;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all .15s;
+  }
+  button:hover { background: var(--dim); color: var(--accent); border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    color: #001820;
+    border-color: var(--accent);
+  }
+  button.primary:hover { background: #00c8e0; }
+  button:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ── Legend ── */
+  .legend { display: flex; flex-direction: column; gap: 7px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #5a7a9a; }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  .stat-box {
+    background: #080f1a;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .stat-box .stat-val { font-size: 17px; color: var(--accent); font-family: var(--font-head); font-weight: 700; }
+  .stat-box .stat-key { font-size: 9px; color: #384a5c; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
+
+  /* ── Visualisation area ── */
+  .vis-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Population grid */
+  .pop-panel {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pop-label {
+    font-family: var(--font-head);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: #4a7090;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  #pop-canvas {
+    display: block;
+    width: 100%;
+    height: 220px;
+    background: #08101a;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  /* Chart panel */
+  .chart-panel {
+    flex: 1;
+    padding: 12px 20px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-label {
+    font-family: var(--font-head);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: #4a7090;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  #line-canvas {
+    flex: 1;
+    display: block;
+    width: 100%;
+    min-height: 200px;
+    background: #08101a;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  /* ── Ticker bar ── */
+  .ticker {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #08101a;
+    font-size: 11px;
+    color: #3a5a70;
+  }
+  .ticker .tick-item { display: flex; align-items: center; gap: 6px; }
+  .tick-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .ticker .day-counter { margin-left: auto; color: #4a7090; font-size: 12px; }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,.06) 3px,
+      rgba(0,0,0,.06) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  .running-indicator { animation: pulse 1.2s infinite; color: var(--i-color); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>PATH<span>O</span>GEN</h1>
+    <div class="subtitle">Outbreak Simulation — SEIRD Model</div>
+  </div>
+  <div class="badge">EDUCATIONAL USE ONLY</div>
+</header>
+
+<main>
+  <!-- ── Sidebar ── -->
+  <aside>
+    <div>
+      <div class="section-label">Transmission Parameters</div>
+      <div class="control-group">
+
+        <div class="control">
+          <label>Contagion Rate (β) <span class="val" id="v-beta">0.40</span></label>
+          <input type="range" id="s-beta" min="0.05" max="1.0" step="0.01" value="0.40">
+          <div class="desc">Probability a susceptible person becomes exposed per contact per day.</div>
+        </div>
+
+        <div class="control">
+          <label>Latent Period (σ⁻¹) <span class="val" id="v-sigma">5 days</span></label>
+          <input type="range" id="s-sigma" min="1" max="14" step="1" value="5">
+          <div class="desc">Average days from exposure to becoming infectious.</div>
+        </div>
+
+        <div class="control">
+          <label>Infectious Period (γ⁻¹) <span class="val" id="v-gamma">8 days</span></label>
+          <input type="range" id="s-gamma" min="1" max="21" step="1" value="8">
+          <div class="desc">Average days an infected person remains contagious.</div>
+        </div>
+
+        <div class="control">
+          <label>Mortality Rate (μ) <span class="val" id="v-mu">2.0%</span></label>
+          <input type="range" id="s-mu" min="0" max="0.30" step="0.005" value="0.02">
+          <div class="desc">Fraction of infected individuals who die.</div>
+        </div>
+
+        <div class="control">
+          <label>Vaccinated Fraction <span class="val" id="v-vax">20%</span></label>
+          <input type="range" id="s-vax" min="0" max="0.95" step="0.01" value="0.20">
+          <div class="desc">Population already immune at day 0 (vaccination or prior immunity).</div>
+        </div>
+
+        <div class="control">
+          <label>Population Size <span class="val" id="v-pop">600</span></label>
+          <input type="range" id="s-pop" min="100" max="1200" step="50" value="600">
+          <div class="desc">Number of individuals in the simulation dot grid.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Simulation Speed</div>
+      <div class="control">
+        <label>Days/second <span class="val" id="v-speed">4</span></label>
+        <input type="range" id="s-speed" min="1" max="20" step="1" value="4">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="btn-run">▶ Run</button>
+      <button id="btn-reset">↺ Reset</button>
+    </div>
+
+    <div>
+      <div class="section-label">Legend</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--s-color)"></div>Susceptible</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--e-color)"></div>Exposed (latent)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--i-color)"></div>Infected (infectious)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--r-color)"></div>Recovered (immune)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--d-color)"></div>Dead</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v-color)"></div>Vaccinated (immune)</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Live Counts</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="st-s">—</div><div class="stat-key">Suscept.</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-e">—</div><div class="stat-key">Exposed</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-i">—</div><div class="stat-key">Infected</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-r">—</div><div class="stat-key">Recovered</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-d">—</div><div class="stat-key">Dead</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-v">—</div><div class="stat-key">Vaccinated</div></div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── Ticker ── -->
+  <div class="ticker">
+    <div class="tick-item"><div class="tick-dot" style="background:var(--e-color)"></div><span id="tk-e">Exposed: 0</span></div>
+    <div class="tick-item"><div class="tick-dot" style="background:var(--i-color)"></div><span id="tk-i">Infected: 0</span></div>
+    <div class="tick-item"><div class="tick-dot" style="background:var(--r-color)"></div><span id="tk-r">Recovered: 0</span></div>
+    <div class="tick-item"><div class="tick-dot" style="background:var(--d-color)"></div><span id="tk-d">Dead: 0</span></div>
+    <div class="tick-item" id="run-status" style="margin-left:auto;display:none">
+      <div class="tick-dot running-indicator" style="background:var(--i-color)"></div>
+      <span class="running-indicator" style="color:var(--i-color);font-size:11px">SIMULATION RUNNING</span>
+    </div>
+    <div class="day-counter" id="day-counter">DAY 0</div>
+  </div>
+
+  <!-- ── Vis Area ── -->
+  <div class="vis-area">
+    <div class="pop-panel">
+      <div class="pop-label">Population Grid — Each Dot Represents One Individual</div>
+      <canvas id="pop-canvas"></canvas>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-label">SEIRD Time Course</div>
+      <canvas id="line-canvas"></canvas>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─────────────────────────────────────────────
+//  Helpers
+// ─────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const COLORS = {
+  S: '#3a8fce', E: '#f0a500', I: '#e03060',
+  R: '#22c97a', D: '#555e6a', V: '#9f7bea'
+};
+
+// ─────────────────────────────────────────────
+//  Slider wiring
+// ─────────────────────────────────────────────
+function wireSlider(sliderId, displayId, fmt) {
+  const sl = $(sliderId), dv = $(displayId);
+  const update = () => { dv.textContent = fmt(parseFloat(sl.value)); };
+  sl.addEventListener('input', update);
+  update();
+}
+
+wireSlider('s-beta',  'v-beta',  v => v.toFixed(2));
+wireSlider('s-sigma', 'v-sigma', v => `${Math.round(v)} days`);
+wireSlider('s-gamma', 'v-gamma', v => `${Math.round(v)} days`);
+wireSlider('s-mu',    'v-mu',    v => `${(v*100).toFixed(1)}%`);
+wireSlider('s-vax',   'v-vax',   v => `${Math.round(v*100)}%`);
+wireSlider('s-pop',   'v-pop',   v => `${Math.round(v)}`);
+wireSlider('s-speed', 'v-speed', v => `${Math.round(v)}`);
+
+// ─────────────────────────────────────────────
+//  State
+// ─────────────────────────────────────────────
+const STATES = ['S','E','I','R','D','V'];
+
+let agents = [];       // {state, x, y, daysInState}
+let history = [];      // [{S,E,I,R,D,V}] per day
+let day = 0;
+let running = false;
+let animHandle = null;
+let lastTick = 0;
+let tickAccum = 0;
+
+// ─────────────────────────────────────────────
+//  Initialise simulation
+// ─────────────────────────────────────────────
+function init() {
+  const N    = parseInt($('s-pop').value);
+  const vFrac = parseFloat($('s-vax').value);
+  const nVax = Math.round(N * vFrac);
+  const nInfected = Math.max(1, Math.round(N * 0.005));
+
+  const popCanvas = $('pop-canvas');
+  const W = popCanvas.clientWidth  || 800;
+  const H = popCanvas.clientHeight || 220;
+
+  agents = [];
+  for (let i = 0; i < N; i++) {
+    let state;
+    if (i < nVax)                      state = 'V';
+    else if (i < nVax + nInfected)     state = 'I';
+    else                               state = 'S';
+
+    agents.push({
+      state,
+      x: 12 + Math.random() * (W - 24),
+      y: 12 + Math.random() * (H - 24),
+      daysInState: state === 'I' ? Math.floor(Math.random() * 3) : 0,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+    });
+  }
+
+  history = [snapshot()];
+  day = 0;
+  updateUI();
+  drawPopCanvas();
+  drawLineChart();
+}
+
+function snapshot() {
+  const cnt = {S:0,E:0,I:0,R:0,D:0,V:0};
+  agents.forEach(a => cnt[a.state]++);
+  return {...cnt};
+}
+
+// ─────────────────────────────────────────────
+//  SEIRD step (discrete-time stochastic)
+// ─────────────────────────────────────────────
+function stepModel() {
+  const beta  = parseFloat($('s-beta').value);
+  const sigma = 1 / parseInt($('s-sigma').value);  // rate
+  const gamma = 1 / parseInt($('s-gamma').value);
+  const mu    = parseFloat($('s-mu').value);
+  const N     = agents.length;
+
+  const nI = agents.filter(a => a.state === 'I').length;
+  const forceOfInfection = beta * (nI / N);  // per-agent daily prob
+
+  const canvas = $('pop-canvas');
+  const W = canvas.clientWidth  || 800;
+  const H = canvas.clientHeight || 220;
+
+  agents.forEach(a => {
+    // gentle drift
+    a.x += a.vx;
+    a.y += a.vy;
+    if (a.x < 8  || a.x > W - 8) a.vx *= -1;
+    if (a.y < 8  || a.y > H - 8) a.vy *= -1;
+    a.x = Math.max(8, Math.min(W - 8, a.x));
+    a.y = Math.max(8, Math.min(H - 8, a.y));
+
+    if (a.state === 'D') return;
+
+    a.daysInState++;
+
+    if (a.state === 'S') {
+      if (Math.random() < forceOfInfection) {
+        a.state = 'E'; a.daysInState = 0;
+      }
+    } else if (a.state === 'E') {
+      if (Math.random() < sigma) {
+        a.state = 'I'; a.daysInState = 0;
+      }
+    } else if (a.state === 'I') {
+      if (Math.random() < mu * gamma) {
+        a.state = 'D'; a.daysInState = 0;
+      } else if (Math.random() < gamma) {
+        a.state = 'R'; a.daysInState = 0;
+      }
+    }
+  });
+
+  day++;
+  const snap = snapshot();
+  history.push(snap);
+  return snap;
+}
+
+// ─────────────────────────────────────────────
+//  Draw population canvas
+// ─────────────────────────────────────────────
+function drawPopCanvas() {
+  const canvas = $('pop-canvas');
+  canvas.width  = canvas.clientWidth  || 800;
+  canvas.height = canvas.clientHeight || 220;
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // subtle grid
+  ctx.strokeStyle = '#0e1e2e';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < canvas.width; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
+  }
+
+  agents.forEach(a => {
+    const col = COLORS[a.state];
+    const r = a.state === 'I' ? 5 : a.state === 'D' ? 3 : 4;
+
+    if (a.state === 'I') {
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, r + 3, 0, Math.PI * 2);
+      ctx.fillStyle = col + '28';
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(a.x, a.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+  });
+}
+
+// ─────────────────────────────────────────────
+//  Draw line chart
+// ─────────────────────────────────────────────
+function drawLineChart() {
+  const canvas = $('line-canvas');
+  canvas.width  = canvas.clientWidth  || 800;
+  canvas.height = canvas.clientHeight || 260;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = {top: 16, right: 20, bottom: 36, left: 52};
+  const cw = W - pad.left - pad.right;
+  const ch = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (history.length < 2) {
+    ctx.fillStyle = '#1a2a3a';
+    ctx.font = '12px Share Tech Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('Run the simulation to see the time course', W/2, H/2);
+    return;
+  }
+
+  const N = agents.length;
+  const days = history.length;
+
+  // grid lines
+  ctx.strokeStyle = '#0e1e2e';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + ch - (i / 4) * ch;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+    ctx.fillStyle = '#2a4a60';
+    ctx.font = '10px Share Tech Mono';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(i / 4 * 100) + '%', pad.left - 6, y + 4);
+  }
+
+  // x axis labels
+  ctx.fillStyle = '#2a4a60';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  const labelCount = Math.min(10, days - 1);
+  for (let i = 0; i <= labelCount; i++) {
+    const d = Math.round(i / labelCount * (days - 1));
+    const x = pad.left + (d / (days - 1)) * cw;
+    ctx.fillText('d' + d, x, H - pad.bottom + 14);
+  }
+
+  // axis labels
+  ctx.save();
+  ctx.translate(14, pad.top + ch / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#2a4a60';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('FRACTION OF POPULATION', 0, 0);
+  ctx.restore();
+
+  ctx.fillStyle = '#2a4a60';
+  ctx.font = '10px Share Tech Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('DAY', pad.left + cw / 2, H - 4);
+
+  // draw series
+  const series = [
+    {key: 'S', color: COLORS.S},
+    {key: 'E', color: COLORS.E},
+    {key: 'I', color: COLORS.I},
+    {key: 'R', color: COLORS.R},
+    {key: 'D', color: COLORS.D},
+    {key: 'V', color: COLORS.V},
+  ];
+
+  series.forEach(({key, color}) => {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = key === 'I' ? 2.5 : 1.5;
+    ctx.lineJoin = 'round';
+    ctx.setLineDash(key === 'V' ? [4, 3] : []);
+
+    history.forEach((snap, i) => {
+      const x = pad.left + (i / (days - 1)) * cw;
+      const y = pad.top + ch - (snap[key] / N) * ch;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // label at end
+    const last = history[history.length - 1];
+    const ex = pad.left + cw + 3;
+    const ey = pad.top + ch - (last[key] / N) * ch;
+    ctx.fillStyle = color;
+    ctx.font = '9px Share Tech Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText(key, ex, ey + 3);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  Update UI stats
+// ─────────────────────────────────────────────
+function updateUI() {
+  const snap = history[history.length - 1];
+  STATES.forEach(s => {
+    $('st-' + s.toLowerCase()).textContent = snap[s];
+  });
+  $('tk-e').textContent = 'Exposed: ' + snap.E;
+  $('tk-i').textContent = 'Infected: ' + snap.I;
+  $('tk-r').textContent = 'Recovered: ' + snap.R;
+  $('tk-d').textContent = 'Dead: ' + snap.D;
+  $('day-counter').textContent = 'DAY ' + day;
+}
+
+// ─────────────────────────────────────────────
+//  Animation loop
+// ─────────────────────────────────────────────
+function isOver() {
+  const snap = history[history.length - 1];
+  return (snap.E + snap.I) === 0;
+}
+
+function loop(ts) {
+  if (!running) return;
+  const speed = parseInt($('s-speed').value);
+  const msPerDay = 1000 / speed;
+
+  tickAccum += ts - lastTick;
+  lastTick = ts;
+
+  while (tickAccum >= msPerDay) {
+    tickAccum -= msPerDay;
+    stepModel();
+    if (isOver()) { stop(); break; }
+  }
+
+  drawPopCanvas();
+  drawLineChart();
+  updateUI();
+
+  if (running) animHandle = requestAnimationFrame(loop);
+}
+
+function start() {
+  if (running) return;
+  running = true;
+  $('btn-run').disabled = true;
+  $('run-status').style.display = 'flex';
+  lastTick = performance.now();
+  tickAccum = 0;
+  animHandle = requestAnimationFrame(loop);
+}
+
+function stop() {
+  running = false;
+  $('btn-run').disabled = false;
+  $('run-status').style.display = 'none';
+  if (animHandle) cancelAnimationFrame(animHandle);
+}
+
+// ─────────────────────────────────────────────
+//  Button handlers
+// ─────────────────────────────────────────────
+$('btn-run').addEventListener('click', () => {
+  if (isOver() && day > 0) {
+    init();
+    setTimeout(start, 50);
+  } else {
+    start();
+  }
+});
+
+$('btn-reset').addEventListener('click', () => {
+  stop();
+  init();
+});
+
+// ─────────────────────────────────────────────
+//  Resize handling
+// ─────────────────────────────────────────────
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (!running) {
+      drawPopCanvas();
+      drawLineChart();
+    }
+  }, 100);
+});
+
+// ─────────────────────────────────────────────
+//  Boot
+// ─────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
