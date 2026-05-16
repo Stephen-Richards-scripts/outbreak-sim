@@ -602,8 +602,8 @@ function drawLineChart() {
     return;
   }
 
-  const N = agents.length;
   const days = history.length;
+  const maxScale = history[0].S;  // initial susceptible count sets the ceiling
 
   // grid lines
   ctx.strokeStyle = '#0e1e2e';
@@ -614,7 +614,7 @@ function drawLineChart() {
     ctx.fillStyle = '#2a4a60';
     ctx.font = '10px Share Tech Mono';
     ctx.textAlign = 'right';
-    ctx.fillText(Math.round(i / 4 * 100) + '%', pad.left - 6, y + 4);
+    ctx.fillText(Math.round(i / 4 * maxScale), pad.left - 6, y + 4);
   }
 
   // x axis labels
@@ -635,7 +635,7 @@ function drawLineChart() {
   ctx.fillStyle = '#2a4a60';
   ctx.font = '10px Share Tech Mono';
   ctx.textAlign = 'center';
-  ctx.fillText('FRACTION OF POPULATION', 0, 0);
+  ctx.fillText('INDIVIDUALS', 0, 0);
   ctx.restore();
 
   ctx.fillStyle = '#2a4a60';
@@ -643,14 +643,15 @@ function drawLineChart() {
   ctx.textAlign = 'center';
   ctx.fillText('DAY', pad.left + cw / 2, H - 4);
 
-  // draw series
+  // omit V line when it would plot above the chart ceiling
+  const showV = history[0].V <= maxScale;
   const series = [
     {key: 'S', color: COLORS.S},
     {key: 'E', color: COLORS.E},
     {key: 'I', color: COLORS.I},
     {key: 'R', color: COLORS.R},
     {key: 'D', color: COLORS.D},
-    {key: 'V', color: COLORS.V},
+    ...(showV ? [{key: 'V', color: COLORS.V}] : []),
   ];
 
   series.forEach(({key, color}) => {
@@ -662,7 +663,7 @@ function drawLineChart() {
 
     history.forEach((snap, i) => {
       const x = pad.left + (i / (days - 1)) * cw;
-      const y = pad.top + ch - (snap[key] / N) * ch;
+      const y = pad.top + ch - (snap[key] / maxScale) * ch;
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
     ctx.stroke();
@@ -671,7 +672,7 @@ function drawLineChart() {
     // label at end
     const last = history[history.length - 1];
     const ex = pad.left + cw + 3;
-    const ey = pad.top + ch - (last[key] / N) * ch;
+    const ey = pad.top + ch - (last[key] / maxScale) * ch;
     ctx.fillStyle = color;
     ctx.font = '9px Share Tech Mono';
     ctx.textAlign = 'left';
