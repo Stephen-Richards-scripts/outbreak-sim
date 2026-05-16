@@ -40,7 +40,7 @@ Transitions are stochastic each day:
 | `snapshot()` | Counts agents by state → one history entry |
 | `stepModel()` | Advances one day: applies drift, runs state transitions, pushes snapshot |
 | `drawPopCanvas()` | Renders agent dots on `#pop-canvas` |
-| `drawLineChart()` | Renders SEIRD time-course curves on `#line-canvas` |
+| `drawLineChart()` | Renders SEIRD time-course curves on `#line-canvas`; Y-axis is scaled to the initial susceptible count (`history[0].S`), and the V series is omitted when `history[0].V > history[0].S` |
 | `updateUI()` | Updates sidebar counts and ticker bar |
 | `isOver()` | Returns true when E + I = 0 |
 | `loop(ts)` | `requestAnimationFrame` callback; accumulates elapsed time to fire `stepModel` at the configured days/second rate |
