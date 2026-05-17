@@ -456,7 +456,7 @@ wireSlider('s-speed', 'v-speed', v => `${Math.round(v)}`);
 // ─────────────────────────────────────────────
 const STATES = ['S','E','I','R','D','V'];
 
-let agents = [];       // {state, x, y, daysInState}
+let agents = [];       // {state, x, y, vx, vy}
 let history = [];      // [{S,E,I,R,D,V}] per day
 let day = 0;
 let running = false;
@@ -488,7 +488,6 @@ function init() {
       state,
       x: 12 + Math.random() * (W - 24),
       y: 12 + Math.random() * (H - 24),
-      daysInState: state === 'I' ? Math.floor(Math.random() * 3) : 0,
       vx: (Math.random() - 0.5) * 0.4,
       vy: (Math.random() - 0.5) * 0.4,
     });
@@ -510,13 +509,9 @@ function snapshot() {
 // ─────────────────────────────────────────────
 //  SEIRD step (discrete-time stochastic)
 // ─────────────────────────────────────────────
-function stepModel() {
-  const R0    = parseFloat($('s-r0').value);
-  const sigma = 1 / parseInt($('s-sigma').value);  // rate
-  const gamma = 1 / parseInt($('s-gamma').value);
-  const mu    = parseFloat($('s-mu').value);
-  const N     = agents.length;
-  const beta  = R0 * gamma;
+function stepModel({ R0, sigma, gamma, mu }) {
+  const N    = agents.length;
+  const beta = R0 * gamma;
 
   const nI   = agents.filter(a => a.state === 'I').length;
   const nD   = agents.filter(a => a.state === 'D').length;
@@ -537,19 +532,17 @@ function stepModel() {
 
     if (a.state === 'D') return;
 
-    a.daysInState++;
-
     if (a.state === 'S') {
       if (Math.random() < forceOfInfection) {
-        a.state = 'E'; a.daysInState = 0;
+        a.state = 'E';
       }
     } else if (a.state === 'E') {
       if (Math.random() < sigma) {
-        a.state = 'I'; a.daysInState = 0;
+        a.state = 'I';
       }
     } else if (a.state === 'I') {
       if (Math.random() < gamma) {
-        a.state = Math.random() < mu ? 'D' : 'R'; a.daysInState = 0;
+        a.state = Math.random() < mu ? 'D' : 'R';
       }
     }
   });
@@ -690,15 +683,6 @@ function drawLineChart() {
     });
     ctx.stroke();
     ctx.setLineDash([]);
-
-    // label at end
-    const last = history[history.length - 1];
-    const ex = pad.left + cw + 3;
-    const ey = pad.top + ch - (last[key] / maxScale) * ch;
-    ctx.fillStyle = color;
-    ctx.font = '9px Share Tech Mono';
-    ctx.textAlign = 'left';
-    ctx.fillText(key, ex, ey + 3);
   });
 }
 
@@ -732,10 +716,18 @@ function loop(ts) {
 
   tickAccum += ts - lastTick;
   lastTick = ts;
+  tickAccum = Math.min(tickAccum, msPerDay * 10);
+
+  const params = {
+    R0:    parseFloat($('s-r0').value),
+    sigma: 1 / parseInt($('s-sigma').value),
+    gamma: 1 / parseInt($('s-gamma').value),
+    mu:    parseFloat($('s-mu').value),
+  };
 
   while (tickAccum >= msPerDay) {
     tickAccum -= msPerDay;
-    stepModel();
+    stepModel(params);
     if (isOver()) { stop(); break; }
   }
 
