@@ -509,13 +509,9 @@ function snapshot() {
 // ─────────────────────────────────────────────
 //  SEIRD step (discrete-time stochastic)
 // ─────────────────────────────────────────────
-function stepModel() {
-  const R0    = parseFloat($('s-r0').value);
-  const sigma = 1 / parseInt($('s-sigma').value);  // rate
-  const gamma = 1 / parseInt($('s-gamma').value);
-  const mu    = parseFloat($('s-mu').value);
-  const N     = agents.length;
-  const beta  = R0 * gamma;
+function stepModel({ R0, sigma, gamma, mu }) {
+  const N    = agents.length;
+  const beta = R0 * gamma;
 
   const nI   = agents.filter(a => a.state === 'I').length;
   const nD   = agents.filter(a => a.state === 'D').length;
@@ -687,15 +683,6 @@ function drawLineChart() {
     });
     ctx.stroke();
     ctx.setLineDash([]);
-
-    // label at end
-    const last = history[history.length - 1];
-    const ex = pad.left + cw + 3;
-    const ey = pad.top + ch - (last[key] / maxScale) * ch;
-    ctx.fillStyle = color;
-    ctx.font = '9px Share Tech Mono';
-    ctx.textAlign = 'left';
-    ctx.fillText(key, ex, ey + 3);
   });
 }
 
@@ -731,9 +718,16 @@ function loop(ts) {
   lastTick = ts;
   tickAccum = Math.min(tickAccum, msPerDay * 10);
 
+  const params = {
+    R0:    parseFloat($('s-r0').value),
+    sigma: 1 / parseInt($('s-sigma').value),
+    gamma: 1 / parseInt($('s-gamma').value),
+    mu:    parseFloat($('s-mu').value),
+  };
+
   while (tickAccum >= msPerDay) {
     tickAccum -= msPerDay;
-    stepModel();
+    stepModel(params);
     if (isOver()) { stop(); break; }
   }
 
