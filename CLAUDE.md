@@ -10,7 +10,7 @@ Open in any browser to run; no server required.
 
 ## Architecture
 
-The simulation implements a **SEIRD + Vaccinated** agent-based model. Each agent carries `{state, x, y, vx, vy, daysInState}` and drifts with gentle Brownian motion inside the canvas bounds.
+The simulation implements a **SEIRD + Vaccinated** agent-based model. Each agent carries `{state, x, y, vx, vy}` and drifts with gentle Brownian motion inside the canvas bounds.
 
 ### State machine
 
@@ -21,10 +21,9 @@ V (immune from day 0, never transitions)
 ```
 
 Transitions are stochastic each day:
-- S→E: probability = β × (nI / N), where β = R0 × γ
+- S→E: probability = β × (nI / (N − nD)), where β = R0 × γ and nD = dead count
 - E→I: probability = σ (= 1 / latent_period)
-- I→D: probability = μ × γ
-- I→R: probability = γ (= 1 / infectious_period)
+- I→{D,R}: departs with probability γ; conditional on departure, dies with probability μ, recovers with probability (1 − μ)
 
 ### Key data structures
 
@@ -38,7 +37,7 @@ Transitions are stochastic each day:
 | `wireSlider` | Binds a range input to its display label |
 | `init()` | Allocates agents, seeds V and I states, resets history |
 | `snapshot()` | Counts agents by state → one history entry |
-| `stepModel()` | Advances one day: applies drift, runs state transitions, pushes snapshot |
+| `stepModel(params)` | Advances one day: applies drift, runs state transitions, pushes snapshot; receives `{R0, sigma, gamma, mu}` from `loop()` |
 | `drawPopCanvas()` | Renders agent dots on `#pop-canvas` |
 | `drawLineChart()` | Renders SEIRD time-course curves on `#line-canvas`; Y-axis is scaled to the initial susceptible count (`history[0].S`), and the V series is omitted when `history[0].V > history[0].S` |
 | `updateUI()` | Updates sidebar counts and ticker bar |
