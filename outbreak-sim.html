@@ -14,12 +14,12 @@
     --accent:    #00e5ff;
     --dim:       #1e3448;
 
-    --s-color:   #3a8fce;   /* Susceptible  */
-    --e-color:   #f0a500;   /* Exposed      */
-    --i-color:   #e03060;   /* Infected     */
-    --r-color:   #22c97a;   /* Recovered    */
-    --d-color:   #555e6a;   /* Dead         */
-    --v-color:   #9f7bea;   /* Vaccinated   */
+    --s-color:   #56B4E9;   /* Susceptible  — Okabe-Ito sky blue      */
+    --e-color:   #E69F00;   /* Exposed      — Okabe-Ito orange        */
+    --i-color:   #D55E00;   /* Infected     — Okabe-Ito vermillion    */
+    --r-color:   #009E73;   /* Recovered    — Okabe-Ito bluish green  */
+    --d-color:   #555e6a;   /* Dead         — neutral dark gray       */
+    --v-color:   #0072B2;   /* Vaccinated   — Okabe-Ito blue          */
 
     --font-mono: 'Share Tech Mono', monospace;
     --font-head: 'Barlow Condensed', sans-serif;
@@ -315,37 +315,37 @@
       <div class="control-group">
 
         <div class="control">
-          <label>Basic Reproduction No. (R₀) <span class="val" id="v-r0">3.0</span></label>
+          <label for="s-r0">Basic Reproduction No. (R₀) <span class="val" id="v-r0">3.0</span></label>
           <input type="range" id="s-r0" min="0.5" max="25" step="0.1" value="3.0">
           <div class="desc">Average number of secondary infections from one case in a fully susceptible population.</div>
         </div>
 
         <div class="control">
-          <label>Latent Period (σ⁻¹) <span class="val" id="v-sigma">5 days</span></label>
+          <label for="s-sigma">Latent Period (σ⁻¹) <span class="val" id="v-sigma">5 days</span></label>
           <input type="range" id="s-sigma" min="1" max="14" step="1" value="5">
           <div class="desc">Average days from exposure to becoming infectious.</div>
         </div>
 
         <div class="control">
-          <label>Infectious Period (γ⁻¹) <span class="val" id="v-gamma">8 days</span></label>
+          <label for="s-gamma">Infectious Period (γ⁻¹) <span class="val" id="v-gamma">8 days</span></label>
           <input type="range" id="s-gamma" min="1" max="21" step="1" value="8">
           <div class="desc">Average days an infected person remains contagious.</div>
         </div>
 
         <div class="control">
-          <label>Mortality Rate (μ) <span class="val" id="v-mu">2.0%</span></label>
+          <label for="s-mu">Mortality Rate (μ) <span class="val" id="v-mu">2.0%</span></label>
           <input type="range" id="s-mu" min="0" max="0.30" step="0.005" value="0.02">
           <div class="desc">Fraction of infected individuals who die.</div>
         </div>
 
         <div class="control">
-          <label>Vaccinated Fraction <span class="val" id="v-vax">20%</span></label>
+          <label for="s-vax">Vaccinated Fraction <span class="val" id="v-vax">20%</span></label>
           <input type="range" id="s-vax" min="0" max="0.95" step="0.01" value="0.20">
           <div class="desc">Population already immune at day 0 (vaccination or prior immunity).</div>
         </div>
 
         <div class="control">
-          <label>Population Size <span class="val" id="v-pop">600</span></label>
+          <label for="s-pop">Population Size <span class="val" id="v-pop">600</span></label>
           <input type="range" id="s-pop" min="100" max="1200" step="50" value="600">
           <div class="desc">Number of individuals in the simulation dot grid.</div>
         </div>
@@ -356,7 +356,7 @@
     <div>
       <div class="section-label">Simulation Speed</div>
       <div class="control">
-        <label>Days/second <span class="val" id="v-speed">4</span></label>
+        <label for="s-speed">Days/second <span class="val" id="v-speed">4</span></label>
         <input type="range" id="s-speed" min="1" max="20" step="1" value="4">
       </div>
     </div>
@@ -414,11 +414,11 @@
           <input type="checkbox" id="chk-hide-vax"> Hide Vaccinated
         </label>
       </div>
-      <canvas id="pop-canvas"></canvas>
+      <canvas id="pop-canvas" aria-label="Population grid showing agent states"></canvas>
     </div>
     <div class="chart-panel">
       <div class="chart-label">SEIRD Time Course</div>
-      <canvas id="line-canvas"></canvas>
+      <canvas id="line-canvas" aria-label="SEIRD time course chart"></canvas>
     </div>
   </div>
 </main>
@@ -429,8 +429,8 @@
 // ─────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const COLORS = {
-  S: '#3a8fce', E: '#f0a500', I: '#e03060',
-  R: '#22c97a', D: '#555e6a', V: '#9f7bea'
+  S: '#56B4E9', E: '#E69F00', I: '#D55E00',
+  R: '#009E73', D: '#555e6a', V: '#0072B2'
 };
 
 // ─────────────────────────────────────────────
@@ -661,20 +661,20 @@ function drawLineChart() {
   // omit V line when it would plot above the chart ceiling
   const showV = history[0].V <= maxScale;
   const series = [
-    {key: 'S', color: COLORS.S},
-    {key: 'E', color: COLORS.E},
-    {key: 'I', color: COLORS.I},
-    {key: 'R', color: COLORS.R},
-    {key: 'D', color: COLORS.D},
-    ...(showV ? [{key: 'V', color: COLORS.V}] : []),
+    {key: 'S', color: COLORS.S, dash: []},
+    {key: 'E', color: COLORS.E, dash: [8, 4]},
+    {key: 'I', color: COLORS.I, dash: []},
+    {key: 'R', color: COLORS.R, dash: [4, 4]},
+    {key: 'D', color: COLORS.D, dash: [2, 3]},
+    ...(showV ? [{key: 'V', color: COLORS.V, dash: [4, 3, 1, 3]}] : []),
   ];
 
-  series.forEach(({key, color}) => {
+  series.forEach(({key, color, dash}) => {
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = key === 'I' ? 2.5 : 1.5;
     ctx.lineJoin = 'round';
-    ctx.setLineDash(key === 'V' ? [4, 3] : []);
+    ctx.setLineDash(dash);
 
     history.forEach((snap, i) => {
       const x = pad.left + (i / (days - 1)) * cw;
