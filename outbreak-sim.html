@@ -518,8 +518,9 @@ function stepModel() {
   const N     = agents.length;
   const beta  = R0 * gamma;
 
-  const nI = agents.filter(a => a.state === 'I').length;
-  const forceOfInfection = beta * (nI / N);  // per-agent daily prob
+  const nI   = agents.filter(a => a.state === 'I').length;
+  const nD   = agents.filter(a => a.state === 'D').length;
+  const forceOfInfection = beta * (nI / (N - nD));  // per-agent daily prob
 
   const canvas = $('pop-canvas');
   const W = canvas.clientWidth  || 800;
