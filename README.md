@@ -21,10 +21,9 @@ Each individual is an agent in one of six states:
 
 State transitions are stochastic each simulated day:
 
-- **S→E** with probability β × (I/N), where β = R₀ × γ
+- **S→E** with probability β × (I / (N − D)), where β = R₀ × γ and D = current dead count
 - **E→I** with probability σ = 1 / latent period
-- **I→D** with probability μ × γ
-- **I→R** with probability γ = 1 / infectious period
+- **I→{D,R}** departs with probability γ; conditional on departure, dies with probability μ, recovers with probability (1 − μ)
 
 The simulation ends when no Exposed or Infected individuals remain.
 
