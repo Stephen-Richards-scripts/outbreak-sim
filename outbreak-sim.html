@@ -729,6 +729,7 @@ function loop(ts) {
 
   tickAccum += ts - lastTick;
   lastTick = ts;
+  tickAccum = Math.min(tickAccum, msPerDay * 10);
 
   while (tickAccum >= msPerDay) {
     tickAccum -= msPerDay;
