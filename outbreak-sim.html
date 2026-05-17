@@ -547,10 +547,8 @@ function stepModel() {
         a.state = 'I'; a.daysInState = 0;
       }
     } else if (a.state === 'I') {
-      if (Math.random() < mu * gamma) {
-        a.state = 'D'; a.daysInState = 0;
-      } else if (Math.random() < gamma) {
-        a.state = 'R'; a.daysInState = 0;
+      if (Math.random() < gamma) {
+        a.state = Math.random() < mu ? 'D' : 'R'; a.daysInState = 0;
       }
     }
   });
