@@ -315,37 +315,37 @@
       <div class="control-group">
 
         <div class="control">
-          <label>Basic Reproduction No. (R₀) <span class="val" id="v-r0">3.0</span></label>
+          <label for="s-r0">Basic Reproduction No. (R₀) <span class="val" id="v-r0">3.0</span></label>
           <input type="range" id="s-r0" min="0.5" max="25" step="0.1" value="3.0">
           <div class="desc">Average number of secondary infections from one case in a fully susceptible population.</div>
         </div>
 
         <div class="control">
-          <label>Latent Period (σ⁻¹) <span class="val" id="v-sigma">5 days</span></label>
+          <label for="s-sigma">Latent Period (σ⁻¹) <span class="val" id="v-sigma">5 days</span></label>
           <input type="range" id="s-sigma" min="1" max="14" step="1" value="5">
           <div class="desc">Average days from exposure to becoming infectious.</div>
         </div>
 
         <div class="control">
-          <label>Infectious Period (γ⁻¹) <span class="val" id="v-gamma">8 days</span></label>
+          <label for="s-gamma">Infectious Period (γ⁻¹) <span class="val" id="v-gamma">8 days</span></label>
           <input type="range" id="s-gamma" min="1" max="21" step="1" value="8">
           <div class="desc">Average days an infected person remains contagious.</div>
         </div>
 
         <div class="control">
-          <label>Mortality Rate (μ) <span class="val" id="v-mu">2.0%</span></label>
+          <label for="s-mu">Mortality Rate (μ) <span class="val" id="v-mu">2.0%</span></label>
           <input type="range" id="s-mu" min="0" max="0.30" step="0.005" value="0.02">
           <div class="desc">Fraction of infected individuals who die.</div>
         </div>
 
         <div class="control">
-          <label>Vaccinated Fraction <span class="val" id="v-vax">20%</span></label>
+          <label for="s-vax">Vaccinated Fraction <span class="val" id="v-vax">20%</span></label>
           <input type="range" id="s-vax" min="0" max="0.95" step="0.01" value="0.20">
           <div class="desc">Population already immune at day 0 (vaccination or prior immunity).</div>
         </div>
 
         <div class="control">
-          <label>Population Size <span class="val" id="v-pop">600</span></label>
+          <label for="s-pop">Population Size <span class="val" id="v-pop">600</span></label>
           <input type="range" id="s-pop" min="100" max="1200" step="50" value="600">
           <div class="desc">Number of individuals in the simulation dot grid.</div>
         </div>
@@ -356,7 +356,7 @@
     <div>
       <div class="section-label">Simulation Speed</div>
       <div class="control">
-        <label>Days/second <span class="val" id="v-speed">4</span></label>
+        <label for="s-speed">Days/second <span class="val" id="v-speed">4</span></label>
         <input type="range" id="s-speed" min="1" max="20" step="1" value="4">
       </div>
     </div>
