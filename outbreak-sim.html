@@ -18,8 +18,9 @@
     --e-color:   #E69F00;   /* Exposed      — Okabe-Ito orange        */
     --i-color:   #D55E00;   /* Infected     — Okabe-Ito vermillion    */
     --r-color:   #009E73;   /* Recovered    — Okabe-Ito bluish green  */
-    --d-color:   #555e6a;   /* Dead         — neutral dark gray       */
-    --v-color:   #0072B2;   /* Vaccinated   — Okabe-Ito blue          */
+    --d-color:   #E03060;   /* Dead         — bright red              */
+    --v-color:   #A78BFA;   /* Vaccinated   — distinct purple         */
+    --l-color:   #CC79A7;   /* Long-term    — Okabe-Ito reddish purple */
 
     --font-mono: 'Share Tech Mono', monospace;
     --font-head: 'Barlow Condensed', sans-serif;
@@ -57,10 +58,10 @@
   header h1 span { color: #e03060; }
   .subtitle {
     font-family: var(--font-head);
-    font-weight: 300;
-    font-size: 13px;
-    letter-spacing: 0.25em;
-    color: #4a7090;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    color: #9fc4dc;
     text-transform: uppercase;
   }
   .badge {
@@ -68,8 +69,8 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 4px 10px;
-    font-size: 11px;
-    color: #4a7090;
+    font-size: 12px;
+    color: #9fc4dc;
     letter-spacing: 0.1em;
   }
 
@@ -99,7 +100,7 @@
     font-size: 11px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #4a7090;
+    color: #9fc4dc;
     margin-bottom: 12px;
     padding-bottom: 6px;
     border-bottom: 1px solid var(--border);
@@ -113,7 +114,7 @@
     align-items: baseline;
     margin-bottom: 6px;
     font-size: 12px;
-    color: #7aa0be;
+    color: #9fc4dc;
   }
   .control label .val {
     font-size: 14px;
@@ -122,7 +123,7 @@
   }
   .control .desc {
     font-size: 10px;
-    color: #384a5c;
+    color: #9fc4dc;
     margin-top: 3px;
     line-height: 1.4;
   }
@@ -172,7 +173,7 @@
 
   /* ── Legend ── */
   .legend { display: flex; flex-direction: column; gap: 7px; }
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #5a7a9a; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #9fc4dc; }
   .legend-dot {
     width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
   }
@@ -191,7 +192,7 @@
     text-align: center;
   }
   .stat-box .stat-val { font-size: 17px; color: var(--accent); font-family: var(--font-head); font-weight: 700; }
-  .stat-box .stat-key { font-size: 9px; color: #384a5c; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
+  .stat-box .stat-key { font-size: 9px; color: #9fc4dc; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
 
   /* ── Visualisation area ── */
   .vis-area {
@@ -207,9 +208,9 @@
   }
   .pop-label {
     font-family: var(--font-head);
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    color: #4a7090;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: #9fc4dc;
     text-transform: uppercase;
     margin-bottom: 10px;
     display: flex;
@@ -219,12 +220,14 @@
   .pop-label-check {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    letter-spacing: 0.15em;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
     cursor: pointer;
   }
   .pop-label-check input[type=checkbox] {
+    width: 18px;
+    height: 18px;
     accent-color: var(--v-color);
     cursor: pointer;
   }
@@ -246,9 +249,9 @@
   }
   .chart-label {
     font-family: var(--font-head);
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    color: #4a7090;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: #9fc4dc;
     text-transform: uppercase;
     margin-bottom: 10px;
   }
@@ -267,16 +270,17 @@
     grid-column: 2;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 16px;
     padding: 8px 20px;
     border-bottom: 1px solid var(--border);
     background: #08101a;
-    font-size: 11px;
-    color: #3a5a70;
+    font-size: 12px;
+    color: #9fc4dc;
   }
   .ticker .tick-item { display: flex; align-items: center; gap: 6px; }
   .tick-dot { width: 7px; height: 7px; border-radius: 50%; }
-  .ticker .day-counter { margin-left: auto; color: #4a7090; font-size: 12px; }
+  .ticker .day-counter { margin-left: auto; color: #7aa0be; font-size: 12px; }
 
   /* Scanline overlay */
   body::after {
@@ -334,8 +338,14 @@
 
         <div class="control">
           <label for="s-mu">Mortality Rate (μ) <span class="val" id="v-mu">2.0%</span></label>
-          <input type="range" id="s-mu" min="0" max="0.30" step="0.005" value="0.02">
+          <input type="range" id="s-mu" min="0" max="0.50" step="0.005" value="0.02">
           <div class="desc">Fraction of infected individuals who die.</div>
+        </div>
+
+        <div class="control">
+          <label for="s-long">Long-Term Symptoms <span class="val" id="v-long">10.0%</span></label>
+          <input type="range" id="s-long" min="0" max="0.50" step="0.005" value="0.10">
+          <div class="desc">Fraction of nonfatal infections that result in persistent long-term symptoms.</div>
         </div>
 
         <div class="control">
@@ -346,7 +356,7 @@
 
         <div class="control">
           <label for="s-pop">Population Size <span class="val" id="v-pop">600</span></label>
-          <input type="range" id="s-pop" min="100" max="1200" step="50" value="600">
+          <input type="range" id="s-pop" min="100" max="2000" step="50" value="1000">
           <div class="desc">Number of individuals in the simulation dot grid.</div>
         </div>
 
@@ -375,6 +385,7 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--r-color)"></div>Recovered (immune)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--d-color)"></div>Dead</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--v-color)"></div>Vaccinated (immune)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--l-color)"></div>Long-term symptoms</div>
       </div>
     </div>
 
@@ -387,6 +398,7 @@
         <div class="stat-box"><div class="stat-val" id="st-r">—</div><div class="stat-key">Recovered</div></div>
         <div class="stat-box"><div class="stat-val" id="st-d">—</div><div class="stat-key">Dead</div></div>
         <div class="stat-box"><div class="stat-val" id="st-v">—</div><div class="stat-key">Vaccinated</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-l">—</div><div class="stat-key">Long-Term</div></div>
       </div>
     </div>
 
@@ -394,10 +406,13 @@
 
   <!-- ── Ticker ── -->
   <div class="ticker">
+    <div class="tick-item"><div class="tick-dot" style="background:var(--s-color)"></div><span id="tk-s">Susceptible: 0</span></div>
     <div class="tick-item"><div class="tick-dot" style="background:var(--e-color)"></div><span id="tk-e">Exposed: 0</span></div>
     <div class="tick-item"><div class="tick-dot" style="background:var(--i-color)"></div><span id="tk-i">Infected: 0</span></div>
     <div class="tick-item"><div class="tick-dot" style="background:var(--r-color)"></div><span id="tk-r">Recovered: 0</span></div>
     <div class="tick-item"><div class="tick-dot" style="background:var(--d-color)"></div><span id="tk-d">Dead: 0</span></div>
+    <div class="tick-item"><div class="tick-dot" style="background:var(--v-color)"></div><span id="tk-v">Vaccinated: 0</span></div>
+    <div class="tick-item"><div class="tick-dot" style="background:var(--l-color)"></div><span id="tk-l">Long-Term: 0</span></div>
     <div class="tick-item" id="run-status" style="margin-left:auto;display:none">
       <div class="tick-dot running-indicator" style="background:var(--i-color)"></div>
       <span class="running-indicator" style="color:var(--i-color);font-size:11px">SIMULATION RUNNING</span>
@@ -430,7 +445,8 @@
 const $ = id => document.getElementById(id);
 const COLORS = {
   S: '#56B4E9', E: '#E69F00', I: '#D55E00',
-  R: '#009E73', D: '#555e6a', V: '#0072B2'
+  R: '#009E73', D: '#E03060', V: '#A78BFA',
+  L: '#CC79A7'
 };
 
 // ─────────────────────────────────────────────
@@ -447,6 +463,7 @@ wireSlider('s-r0',    'v-r0',    v => v.toFixed(1));
 wireSlider('s-sigma', 'v-sigma', v => `${Math.round(v)} days`);
 wireSlider('s-gamma', 'v-gamma', v => `${Math.round(v)} days`);
 wireSlider('s-mu',    'v-mu',    v => `${(v*100).toFixed(1)}%`);
+wireSlider('s-long',  'v-long',  v => `${(v*100).toFixed(1)}%`);
 wireSlider('s-vax',   'v-vax',   v => `${Math.round(v*100)}%`);
 wireSlider('s-pop',   'v-pop',   v => `${Math.round(v)}`);
 wireSlider('s-speed', 'v-speed', v => `${Math.round(v)}`);
@@ -454,10 +471,10 @@ wireSlider('s-speed', 'v-speed', v => `${Math.round(v)}`);
 // ─────────────────────────────────────────────
 //  State
 // ─────────────────────────────────────────────
-const STATES = ['S','E','I','R','D','V'];
+const STATES = ['S','E','I','R','D','V','L'];
 
-let agents = [];       // {state, x, y, vx, vy}
-let history = [];      // [{S,E,I,R,D,V}] per day
+let agents = [];       // {state, longTerm, x, y, vx, vy}
+let history = [];      // [{S,E,I,R,D,V,L}] per day
 let day = 0;
 let running = false;
 let animHandle = null;
@@ -486,6 +503,7 @@ function init() {
 
     agents.push({
       state,
+      longTerm: false,
       x: 12 + Math.random() * (W - 24),
       y: 12 + Math.random() * (H - 24),
       vx: (Math.random() - 0.5) * 0.4,
@@ -501,15 +519,18 @@ function init() {
 }
 
 function snapshot() {
-  const cnt = {S:0,E:0,I:0,R:0,D:0,V:0};
-  agents.forEach(a => cnt[a.state]++);
+  const cnt = {S:0,E:0,I:0,R:0,D:0,V:0,L:0};
+  agents.forEach(a => {
+    cnt[a.state]++;
+    if (a.longTerm) cnt.L++;
+  });
   return {...cnt};
 }
 
 // ─────────────────────────────────────────────
 //  SEIRD step (discrete-time stochastic)
 // ─────────────────────────────────────────────
-function stepModel({ R0, sigma, gamma, mu }) {
+function stepModel({ R0, sigma, gamma, mu, longTermRate }) {
   const N    = agents.length;
   const beta = R0 * gamma;
 
@@ -542,7 +563,12 @@ function stepModel({ R0, sigma, gamma, mu }) {
       }
     } else if (a.state === 'I') {
       if (Math.random() < gamma) {
-        a.state = Math.random() < mu ? 'D' : 'R';
+        if (Math.random() < mu) {
+          a.state = 'D';
+        } else {
+          a.state = 'R';
+          a.longTerm = Math.random() < longTermRate;
+        }
       }
     }
   });
@@ -626,15 +652,15 @@ function drawLineChart() {
   for (let i = 0; i <= 4; i++) {
     const y = pad.top + ch - (i / 4) * ch;
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
-    ctx.fillStyle = '#2a4a60';
-    ctx.font = '10px Share Tech Mono';
+    ctx.fillStyle = '#9fc4dc';
+    ctx.font = '12px Share Tech Mono';
     ctx.textAlign = 'right';
     ctx.fillText(Math.round(i / 4 * maxScale), pad.left - 6, y + 4);
   }
 
   // x axis labels
-  ctx.fillStyle = '#2a4a60';
-  ctx.font = '10px Share Tech Mono';
+  ctx.fillStyle = '#7aa0be';
+  ctx.font = '12px Share Tech Mono';
   ctx.textAlign = 'center';
   const labelCount = Math.min(10, days - 1);
   for (let i = 0; i <= labelCount; i++) {
@@ -647,14 +673,14 @@ function drawLineChart() {
   ctx.save();
   ctx.translate(14, pad.top + ch / 2);
   ctx.rotate(-Math.PI / 2);
-  ctx.fillStyle = '#2a4a60';
-  ctx.font = '10px Share Tech Mono';
+  ctx.fillStyle = '#7aa0be';
+  ctx.font = '12px Share Tech Mono';
   ctx.textAlign = 'center';
   ctx.fillText('INDIVIDUALS', 0, 0);
   ctx.restore();
 
-  ctx.fillStyle = '#2a4a60';
-  ctx.font = '10px Share Tech Mono';
+  ctx.fillStyle = '#7aa0be';
+  ctx.font = '12px Share Tech Mono';
   ctx.textAlign = 'center';
   ctx.fillText('DAY', pad.left + cw / 2, H - 4);
 
@@ -666,6 +692,7 @@ function drawLineChart() {
     {key: 'I', color: COLORS.I, dash: []},
     {key: 'R', color: COLORS.R, dash: [4, 4]},
     {key: 'D', color: COLORS.D, dash: [2, 3]},
+    {key: 'L', color: COLORS.L, dash: [10, 3]},
     ...(showV ? [{key: 'V', color: COLORS.V, dash: [4, 3, 1, 3]}] : []),
   ];
 
@@ -694,10 +721,13 @@ function updateUI() {
   STATES.forEach(s => {
     $('st-' + s.toLowerCase()).textContent = snap[s];
   });
+  $('tk-s').textContent = 'Susceptible: ' + snap.S;
   $('tk-e').textContent = 'Exposed: ' + snap.E;
   $('tk-i').textContent = 'Infected: ' + snap.I;
   $('tk-r').textContent = 'Recovered: ' + snap.R;
   $('tk-d').textContent = 'Dead: ' + snap.D;
+  $('tk-v').textContent = 'Vaccinated: ' + snap.V;
+  $('tk-l').textContent = 'Long-Term: ' + snap.L;
   $('day-counter').textContent = 'DAY ' + day;
 }
 
@@ -723,6 +753,7 @@ function loop(ts) {
     sigma: 1 / parseInt($('s-sigma').value),
     gamma: 1 / parseInt($('s-gamma').value),
     mu:    parseFloat($('s-mu').value),
+    longTermRate: parseFloat($('s-long').value),
   };
 
   while (tickAccum >= msPerDay) {
